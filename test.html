@@ -54,6 +54,7 @@ class Bar
 
 	constructor (elem)
 	{
+		this.loadDoc();
 		elem.innerHTML='<div  class="bar-progress" style="width:0%"></div>' 
 			+	'<div  class="bar-text" style="position:absolute;top:0;left:0;width:100%;text-align:center"></div>';
 		this.elem = elem.children[0]; 
@@ -61,27 +62,43 @@ class Bar
 		this.width = 0;
 		this.target =0;
 		this.elemText.innerHTML= this.elem.style.width;
+		this.limit = 100;
+		//this.elemText.innerHTML= this.bean;
+		
 	}
 
+	loadDoc() {
+		var xhttp = new XMLHttpRequest();
+		var bar = this;
+		xhttp.onreadystatechange=function() {
+		if (this.readyState == 4 && this.status == 200) {
+			bar.bean=JSON.parse(this.responseText);
+			bar.limit = bar.bean.limit;
+		}
+		};
+		xhttp.open("GET", "http://pb-api.herokuapp.com/bars" , true);
+		xhttp.send();
+	}
 	move(delta)
 	{
 	  this.target =this.target +delta;
+	  var bar = this;
 	  var id = setInterval(frame, 10);
-	  var elem = this.elem;
-	  var elemText = this.elemText;
-	  var str = elem.style.width; 
+	  
+	  
+	  var str = bar.elem.style.width; 
 	  var w =  0;
 	  if (str.endsWith("%"))
 	  { w= str.substr(0,str.length-1); }
 	  
-	  var l= this.target;
+	  
 	  function frame() {
-		if (w >= l) {
+		if (w >= bar.target) {
 		  clearInterval(id);
 		} else {
 		  w++; 
-		  elem.style.width =  w + '%'; 
-		  elemText.innerHTML= elem.style.width;
+		  bar.elem.style.width =  w + '%'; 
+		  bar.elemText.innerHTML= bar.elem.style.width;
 		}
 	  }
 	}
